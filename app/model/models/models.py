@@ -94,7 +94,6 @@ class Record(AuditableMixin, Base):
     __tablename__ = "records"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-
     crawl_id: Mapped[int] = mapped_column(ForeignKey("crawls.id"))
     record_type: Mapped[RecordType] = mapped_column(String(50))
 
