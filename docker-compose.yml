@@ -1,0 +1,5 @@
+services:
+  scrappy-crawler:
+    build: .
+    env_file:
+      - .env
