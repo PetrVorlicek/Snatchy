@@ -3,9 +3,10 @@ name = "snatchy"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "alembic>=1.18.4",
+    "alembic==1.18.4",
+    "bs4==0.0.2",
     "playwright==1.57.0",
-    "playwright-stealth>=2.0.1",
+    "playwright-stealth==2.0.1",
     "psycopg2-binary>=2.9.11",
     "python-dotenv>=1.2.1",
     "sqlalchemy>=2.0.46",

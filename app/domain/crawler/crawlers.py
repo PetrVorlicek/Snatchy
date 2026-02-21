@@ -3,22 +3,18 @@ import asyncio
 
 from app.domain.crawler.engines import StealthPlaywrightEngine
 
+URL = "https://www.bezrealitky.cz/vyhledat?estateType=BYT&location=exact&offerType=PRODEJ&osm_value=Hlavn%C3%AD+m%C4%9Bsto+Praha%2C+Praha%2C+%C4%8Cesko&regionOsmIds=R435514&currency=CZK&locale=CS"
+
 
 class Crawler:
     def __init__(self):
         self._url = None
         self._engine = None
-        self._parser = None
 
     def set_engine(self, engine):
         if self._engine is not None:
             raise ValueError("Engine is already set")
         self._engine = engine
-
-    def set_parser(self, parser):
-        if self._parser is not None:
-            raise ValueError("Parser is already set")
-        self._parser = parser
 
     def set_url(self, url):
         if self._url is not None:
@@ -27,11 +23,7 @@ class Crawler:
 
     @property
     def is_ready(self):
-        return (
-            self._engine is not None
-            and self._parser is not None
-            and self._url is not None
-        )
+        return self._engine is not None and self._url is not None
 
     @asynccontextmanager
     async def get_page(self):
@@ -49,19 +41,22 @@ class Crawler:
                     print("Page context closed")
 
 
-def build_crawler(url: str, parser):
+def build_crawler(url: str) -> Crawler:
     crawler = Crawler()
     crawler.set_url(url)
-    crawler.set_parser(parser)
     crawler.set_engine(StealthPlaywrightEngine)
     return crawler
 
 
 async def main():
-    crawler = build_crawler("https://google.com", parser="dummy_parser")
+    crawler = build_crawler(URL)
     async with crawler.get_page() as page:
-        html = await page.content()  # TODO: Use parser to parse different sites
-        print(html)
+        html = await page.content()
+        from app.domain.crawler.parsers import BezRealitkyParser
+
+        parser = BezRealitkyParser()
+        results = parser.parse(html)
+        print(results)
 
 
 if __name__ == "__main__":
