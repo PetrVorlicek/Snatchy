@@ -114,6 +114,7 @@ class RealEstateRecord(Record):
         Numeric(precision=12, scale=2), default=None
     )
     currency: Mapped[Optional[Currency]] = mapped_column(String(3), default=None)
+    flooring_m_squared: Mapped[Optional[float]] = mapped_column(default=None)
     location: Mapped[Optional[str]] = mapped_column(String(2048))
 
     descriptions = relationship("Description", back_populates="record")
