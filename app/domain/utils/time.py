@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 def now() -> datetime:
     """Returns the current UTC time."""
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def make_utc(dt: datetime) -> datetime:

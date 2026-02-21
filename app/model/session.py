@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 import os
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+@asynccontextmanager
 async def aget_session():
     async with AsyncSessionLocal() as session:
         yield session

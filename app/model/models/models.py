@@ -67,7 +67,7 @@ class DomainRegulation(SimpleIdMixin, AuditableMixin, Base):
     domain_id: Mapped[int] = mapped_column(ForeignKey("domains.id"))
     is_allowed: Mapped[bool] = mapped_column()  # If domain is allowed for crawling
 
-    domain: Mapped[Domain] = relationship("Domain", back_populates="regulations")
+    domain: Mapped[Domain] = relationship("Domain", back_populates="domain_regulations")
 
 
 # ### CRAWL MODELS ### #
