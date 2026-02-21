@@ -1,6 +1,9 @@
 import asyncio
 from typing import Callable, Any
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Scheduler:
@@ -21,8 +24,11 @@ class Scheduler:
 
     async def sleep(self, duration: timedelta):
         time_target = asyncio.get_event_loop().time() + duration.total_seconds()
+        logger.info(
+            f"Scheduler sleeping for {duration.total_seconds()} seconds, until {time_target}"
+        )
         while asyncio.get_event_loop().time() < time_target:
-            if not self.is_stopped:
+            if self.is_stopped:
                 break
             await asyncio.sleep(1)
 

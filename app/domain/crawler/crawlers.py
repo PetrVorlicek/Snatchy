@@ -46,19 +46,3 @@ def build_crawler(url: str) -> Crawler:
     crawler.set_url(url)
     crawler.set_engine(StealthPlaywrightEngine)
     return crawler
-
-
-async def main():
-    crawler = build_crawler(URL)
-    async with crawler.get_page() as page:
-        html = await page.content()
-        from app.domain.crawler.parsers import BezRealitkyParser
-
-        parser = BezRealitkyParser()
-        results = parser.parse(html)
-        print(results)
-
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
