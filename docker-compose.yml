@@ -3,3 +3,17 @@ services:
     build: .
     env_file:
       - .env
+    profiles:
+      - crawler
+
+  scrappy-api-server:
+    build:
+      context: .
+      dockerfile: api_server.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    profiles:
+      - api_server
+
