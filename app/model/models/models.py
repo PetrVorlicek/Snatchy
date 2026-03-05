@@ -2,7 +2,15 @@ from datetime import datetime
 from decimal import Decimal
 
 from typing import Optional
-from sqlalchemy import String, ForeignKey, Numeric, MetaData, CheckConstraint
+from sqlalchemy import (
+    String,
+    ForeignKey,
+    Numeric,
+    MetaData,
+    CheckConstraint,
+    Boolean,
+    Integer,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from app.domain.utils.time import now
@@ -59,6 +67,9 @@ class Site(SimpleIdMixin, AuditableMixin, Base):
 
     domain: Mapped[Domain] = relationship("Domain", back_populates="sites")
     crawls: Mapped[list["Crawl"]] = relationship("Crawl", back_populates="site")
+    crawl_targets: Mapped[list["CrawlTarget"]] = relationship(
+        "CrawlTarget", back_populates="site"
+    )
 
 
 class DomainRegulation(SimpleIdMixin, AuditableMixin, Base):
@@ -68,6 +79,61 @@ class DomainRegulation(SimpleIdMixin, AuditableMixin, Base):
     is_allowed: Mapped[bool] = mapped_column()  # If domain is allowed for crawling
 
     domain: Mapped[Domain] = relationship("Domain", back_populates="domain_regulations")
+
+
+class CrawlTarget(SimpleIdMixin, AuditableMixin, Base):
+    __tablename__ = "crawl_targets"
+
+    site_id: Mapped[int] = mapped_column(ForeignKey("sites.id"))
+    url: Mapped[str] = mapped_column(String(4096), unique=True)
+    parser_key: Mapped[str] = mapped_column(String(128), default="bezrealitky")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    frequency_minutes: Mapped[int] = mapped_column(Integer, default=24 * 60)
+    last_run_at: Mapped[Optional[datetime]] = mapped_column(default=None)
+    headless: Mapped[Optional[bool]] = mapped_column(Boolean, default=None)
+    nav_timeout_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    max_attempts: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    retry_sleep_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    networkidle_timeout_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    cookie_wait_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    cmp_wait_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    manual_wait_ms: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+
+    site: Mapped[Site] = relationship("Site", back_populates="crawl_targets")
+
+    __table_args__ = (
+        CheckConstraint(
+            "frequency_minutes > 0", name="check_frequency_minutes_positive"
+        ),
+        CheckConstraint(
+            "nav_timeout_ms IS NULL OR nav_timeout_ms > 0",
+            name="check_nav_timeout_ms_positive",
+        ),
+        CheckConstraint(
+            "max_attempts IS NULL OR max_attempts > 0",
+            name="check_max_attempts_positive",
+        ),
+        CheckConstraint(
+            "retry_sleep_ms IS NULL OR retry_sleep_ms > 0",
+            name="check_retry_sleep_ms_positive",
+        ),
+        CheckConstraint(
+            "networkidle_timeout_ms IS NULL OR networkidle_timeout_ms > 0",
+            name="check_networkidle_timeout_ms_positive",
+        ),
+        CheckConstraint(
+            "cookie_wait_ms IS NULL OR cookie_wait_ms > 0",
+            name="check_cookie_wait_ms_positive",
+        ),
+        CheckConstraint(
+            "cmp_wait_ms IS NULL OR cmp_wait_ms > 0",
+            name="check_cmp_wait_ms_positive",
+        ),
+        CheckConstraint(
+            "manual_wait_ms IS NULL OR manual_wait_ms >= 0",
+            name="check_manual_wait_ms_non_negative",
+        ),
+    )
 
 
 # ### CRAWL MODELS ### #
@@ -109,6 +175,7 @@ class RealEstateRecord(Record):
 
     id: Mapped[int] = mapped_column(ForeignKey("records.id"), primary_key=True)
     published_at: Mapped[Optional[datetime]] = mapped_column(default=None)
+    last_seen: Mapped[Optional[datetime]] = mapped_column(default=None)
     title: Mapped[str] = mapped_column(String(2048))
     price: Mapped[Optional[Decimal]] = mapped_column(
         Numeric(precision=12, scale=2), default=None
@@ -116,6 +183,7 @@ class RealEstateRecord(Record):
     currency: Mapped[Optional[Currency]] = mapped_column(String(3), default=None)
     flooring_m_squared: Mapped[Optional[float]] = mapped_column(default=None)
     location: Mapped[Optional[str]] = mapped_column(String(2048))
+    source_url: Mapped[Optional[str]] = mapped_column(String(4096), default=None)
 
     descriptions = relationship("Description", back_populates="record")
 

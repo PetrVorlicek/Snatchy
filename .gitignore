@@ -115,3 +115,6 @@ playwright/.cache/
 
 # Linux
 *~
+
+#custom
+.snatchy_profile/
